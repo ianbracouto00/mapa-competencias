@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa de Competências do Grupo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: cabeçalho com a proposta, três abas (Pessoas, Montar equipe, Riscos), conteúdo em grade de cartões */
+:root{
+  --bg:#f4f6fa; --surface:#ffffff; --ink:#152033; --muted:#5b6880; --line:#dde3ee;
+  --accent:#2350d8; --accent-soft:#e6ecfd;
+  --ok:#1f8a5b; --ok-soft:#e1f4ea; --warn:#b26a00; --warn-soft:#fdf0d9; --bad:#c23a3a; --bad-soft:#fbe5e5;
+  --display:"Sora", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1520; --surface:#18202e; --ink:#e7ecf5; --muted:#98a4ba; --line:#2a3446;
+    --accent:#7d9bff; --accent-soft:#1f2b4d;
+    --ok:#5fcf98; --ok-soft:#173527; --warn:#f0b35a; --warn-soft:#3a2c14; --bad:#ff8a8a; --bad-soft:#3d1d1f;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1520; --surface:#18202e; --ink:#e7ecf5; --muted:#98a4ba; --line:#2a3446;
+  --accent:#7d9bff; --accent-soft:#1f2b4d;
+  --ok:#5fcf98; --ok-soft:#173527; --warn:#f0b35a; --warn-soft:#3a2c14; --bad:#ff8a8a; --bad-soft:#3d1d1f;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1120px;margin:0 auto;padding:28px 20px 48px}
+header{display:grid;gap:10px;margin-bottom:22px}
+.tag{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+h1{font-family:var(--display);font-size:30px;line-height:1.15;margin:0;text-wrap:balance}
+.lead{color:var(--muted);max-width:68ch;margin:0}
+.demo{font-size:12.5px;color:var(--warn);background:var(--warn-soft);border-radius:6px;padding:3px 8px;justify-self:start}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0 22px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.tile b{display:block;font-family:var(--display);font-size:26px;font-variant-numeric:tabular-nums}
+.tile span{color:var(--muted);font-size:13px}
+.tile.alert b{color:var(--bad)}
+nav{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:18px;flex-wrap:wrap}
+nav a{padding:10px 14px;text-decoration:none;color:var(--muted);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px}
+nav a[aria-current="page"]{color:var(--accent);border-color:var(--accent)}
+nav a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.view{display:none}.view.on{display:block}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+input[type=search],select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 12px}
+input[type=search]{flex:1;min-width:220px}
+.count{color:var(--muted);font-size:13px;margin:0 0 10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:8px;align-content:start}
+.top{display:flex;justify-content:space-between;gap:8px;align-items:start}
+.name{font-weight:600}
+.role{color:var(--muted);font-size:13px}
+.unit{font-size:12px;color:var(--accent);background:var(--accent-soft);border-radius:5px;padding:2px 7px;justify-self:start}
+.pill{font-size:11.5px;font-weight:600;border-radius:99px;padding:2px 8px;white-space:nowrap}
+.p-ok{background:var(--ok-soft);color:var(--ok)}.p-warn{background:var(--warn-soft);color:var(--warn)}.p-bad{background:var(--bad-soft);color:var(--bad)}
+.skills{display:flex;flex-wrap:wrap;gap:5px}
+.sk{font-size:12px;border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+.sk i{font-style:normal;color:var(--accent);letter-spacing:-1px;margin-left:3px}
+.sk.hit{border-color:var(--accent);background:var(--accent-soft)}
+.certs{font-size:12px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
+.chip{font:inherit;font-size:13px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:99px;padding:5px 12px}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px}
+.panel h3{font-family:var(--display);font-size:16px;margin:0 0 8px}
+.meter{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0}
+.meter div{height:100%;background:var(--ok)}
+.muted{color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600}
+td.n{font-variant-numeric:tabular-nums}
+.tbl{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.btn{font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:8px;padding:7px 12px}
+.btn.ghost{background:transparent;color:var(--accent)}
+.card .btn{justify-self:start;margin-top:2px}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);padding:20px;width:min(480px,calc(100% - 32px))}
+dialog::backdrop{background:rgba(10,15,25,.45)}
+dialog h3{font-family:var(--display);margin:0 0 12px;font-size:17px}
+dialog form{display:grid;gap:6px}
+dialog label{font-size:13px;color:var(--muted);margin-top:6px}
+dialog input,dialog textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 12px}
+.acts{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.rq{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:12px 14px;margin-bottom:10px;display:grid;gap:4px}
+.rq .top span{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+#nreq{font-size:11px;background:var(--accent);color:#fff;border-radius:99px;padding:0 6px;margin-left:4px}
+#nreq:empty{display:none}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:26px}
+.how div{border-top:3px solid var(--accent);background:var(--surface);border-radius:0 0 10px 10px;padding:12px 14px;font-size:14px}
+.how b{display:block;margin-bottom:4px}
+@media (max-width:760px){.tiles{grid-template-columns:repeat(2,1fr)}.two,.how{grid-template-columns:1fr}h1{font-size:24px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <span class="tag">Programa de ideias · Proposta de Ian Braga do Couto (TI)</span>
+  <h1>Mapa de Competências do Grupo</h1>
+  <p class="lead">Com as aquisições, o grupo passou a ter especialistas em várias empresas, mas ninguém sabe ao certo quem domina o quê. Este protótipo reúne pessoas, habilidades e certificações num só lugar para encontrar especialistas, pedir ajuda a colegas de outros projetos, montar equipes e enxergar onde o conhecimento depende de uma única pessoa.</p>
+  <span class="demo">Protótipo com dados fictícios</span>
+</header>
+
+<section class="tiles" id="tiles"></section>
+
+<nav aria-label="Seções">
+  <a href="#pessoas" data-v="pessoas">Encontrar pessoas</a>
+  <a href="#equipe" data-v="equipe">Montar equipe</a>
+  <a href="#ajuda" data-v="ajuda">Pedidos de ajuda <span id="nreq"></span></a>
+  <a href="#riscos" data-v="riscos">Riscos e lacunas</a>
+</nav>
+
+<section class="view" id="v-pessoas">
+  <div class="bar">
+    <label class="sr" for="q" hidden>Buscar</label>
+    <input type="search" id="q" placeholder="Busque por habilidade, certificação ou nome (ex.: AWS, ITSM, Kubernetes)">
+    <select id="fu" aria-label="Filtrar por empresa"></select>
+    <select id="fd" aria-label="Filtrar por disponibilidade">
+      <option value="">Qualquer disponibilidade</option>
+      <option>Disponível</option><option>Parcial</option><option>Alocado</option>
+    </select>
+  </div>
+  <p class="count" id="cnt"></p>
+  <div class="grid" id="list"></div>
+</section>
+
+<section class="view" id="v-equipe">
+  <p class="muted" style="margin-top:0">Escolha o que o projeto precisa. O mapa sugere a menor equipe que cobre tudo, dando preferência a quem está disponível e tem nível mais alto.</p>
+  <div class="chips" id="req"></div>
+  <div class="panel" id="cov"></div>
+  <div class="grid" id="team"></div>
+</section>
+
+<section class="view" id="v-ajuda">
+  <p class="muted" style="margin-top:0">Travou em algo que não é da sua área? Ache quem sabe em "Encontrar pessoas" e clique em <b>Pedir ajuda</b>. O pedido vira um chamado para a pessoa, com prazo e registro, sem precisar conhecê-la antes.</p>
+  <div id="reqs"></div>
+</section>
+
+<dialog id="dlg">
+  <form id="f" method="dialog">
+    <h3 id="dt">Pedir ajuda</h3>
+    <label for="fs">Assunto</label>
+    <select id="fs"></select>
+    <label for="fp">Projeto em que você está</label>
+    <input id="fp" type="text" value="Migração para nuvem – órgão federal">
+    <label for="fm">O que você precisa</label>
+    <textarea id="fm" rows="4" required placeholder="Ex.: Travei em uma configuração e preciso de 30 minutos com alguém que já fez isso. Consegue esta semana?"></textarea>
+    <label for="fu2">Urgência</label>
+    <select id="fu2"><option>Baixa (até 5 dias)</option><option selected>Média (até 2 dias)</option><option>Alta (hoje)</option></select>
+    <div class="acts"><button type="button" class="btn ghost" id="cancel">Cancelar</button><button type="submit" class="btn">Abrir chamado</button></div>
+  </form>
+</dialog>
+
+<section class="view" id="v-riscos">
+  <div class="two">
+    <div class="panel">
+      <h3>Conhecimento concentrado em uma pessoa</h3>
+      <p class="muted" style="margin:0 0 10px;font-size:14px">Se essa pessoa sair ou ficar alocada, o grupo perde a capacidade de atender.</p>
+      <div id="single"></div>
+    </div>
+    <div class="panel">
+      <h3>Certificações vencendo em até 120 dias</h3>
+      <p class="muted" style="margin:0 0 10px;font-size:14px">Certificações vencidas podem tirar o grupo de licitações que exigem atestado.</p>
+      <div id="exp"></div>
+    </div>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Habilidade</th><th>Pessoas</th><th>Nível avançado</th><th>Empresas</th></tr></thead>
+      <tbody id="matrix"></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="how">
+  <div><b>1. Cadastro simples</b>Cada colaborador preenche habilidades e certificações uma vez. O RH importa os dados que já tem.</div>
+  <div><b>2. Integração</b>Pode rodar como aplicação no ServiceNow, que o grupo já usa, ou ler do Microsoft Entra e do Teams.</div>
+  <div><b>3. Ganho</b>Troca de experiência entre projetos, menos tempo para montar equipes, mais vendas cruzadas e certificações em dia.</div>
+</section>
+</div>
+
+<script>
+const HOJE = new Date("2026-11-17");
+const U = ["Nuvem & Broker","ServiceNow","Data Center","Infra & Redes"];
+const P = [
+ ["Ana Ribeiro","Arquiteta de Nuvem",0,"Disponível",{AWS:3,Azure:2,Terraform:3,FinOps:2},[["AWS Solutions Architect Pro","2027-01-20"]]],
+ ["Bruno Teixeira","Analista FinOps",0,"Parcial",{FinOps:3,AWS:2,"Power BI":3},[["FinOps Practitioner","2027-08-02"]]],
+ ["Carla Menezes","Engenheira DevOps",0,"Alocado",{Kubernetes:3,Azure:3,Terraform:2,"CI/CD":3},[["CKA","2026-12-28"]]],
+ ["Diego Souza","Analista de Nuvem Jr.",0,"Disponível",{AWS:1,Linux:2,Python:2},[]],
+ ["Eduarda Lima","Gerente de Contas Governo",0,"Parcial",{"Licitações":3,"Gestão de Contratos":3},[]],
+ ["Felipe Rocha","Arquiteto Multicloud",0,"Alocado",{Azure:3,"Google Cloud":3,Kubernetes:2,"Segurança em Nuvem":2},[["GCP Professional Architect","2028-03-11"]]],
+ ["Gabriela Nunes","Desenvolvedora ServiceNow",1,"Disponível",{"ServiceNow ITSM":3,JavaScript:3,"ServiceNow ITOM":1},[["ServiceNow CAD","2027-05-09"]]],
+ ["Henrique Alves","Consultor ServiceNow",1,"Alocado",{"ServiceNow ITSM":3,"ServiceNow HRSD":3,ITIL:3},[["ServiceNow CIS-ITSM","2027-02-14"],["ITIL 4","2029-01-01"]]],
+ ["Isabela Castro","Analista de Processos",1,"Disponível",{ITIL:2,"ServiceNow ITSM":1,"Power BI":2},[["ITIL 4","2028-06-30"]]],
+ ["João Pedro Martins","Arquiteto ServiceNow",1,"Parcial",{"ServiceNow ITOM":3,"ServiceNow ITSM":3,"Integrações API":3},[["ServiceNow CTA","2026-12-05"]]],
+ ["Karen Duarte","Desenvolvedora",1,"Disponível",{JavaScript:2,Python:2,"Integrações API":2},[]],
+ ["Lucas Pires","Especialista SecOps",1,"Alocado",{"ServiceNow SecOps":3,"Segurança em Nuvem":2},[["ServiceNow CIS-SIR","2027-09-19"]]],
+ ["Mariana Gomes","Engenheira de Data Center",2,"Disponível",{"Infra Data Center":3,"VMware":3,Linux:2},[["VMware VCP-DCV","2027-03-01"]]],
+ ["Nicolas Freitas","Técnico de Data Center",2,"Parcial",{"Infra Data Center":2,"Cabeamento":3},[]],
+ ["Olívia Barros","Coordenadora de Operações",2,"Alocado",{"Gestão de Contratos":2,ITIL:2,"Infra Data Center":2},[["ITIL 4","2027-11-10"]]],
+ ["Paulo Henrique Dias","Especialista em Backup",2,"Disponível",{"Backup e DR":3,VMware:2,Azure:1},[["Veeam VMCE","2027-01-08"]]],
+ ["Rafaela Moura","Analista de Redes",3,"Disponível",{Redes:3,Firewall:3,Linux:2},[["Cisco CCNP","2027-07-21"]]],
+ ["Samuel Cardoso","Engenheiro de Segurança",3,"Alocado",{Firewall:3,"Segurança em Nuvem":3,LGPD:2},[["CISSP","2028-02-02"]]],
+ ["Tatiane Vieira","Analista de Suporte",3,"Disponível",{"Microsoft 365":3,Windows:3,ITIL:1},[]],
+ ["Victor Hugo Reis","Administrador Linux",3,"Parcial",{Linux:3,Kubernetes:1,Python:2,"Backup e DR":1},[["RHCSA","2027-04-15"]]],
+ ["Yasmin Correia","Especialista em Privacidade",3,"Disponível",{LGPD:3,"Gestão de Contratos":2},[["Exin Privacy & Data Protection","2026-12-30"]]],
+ ["Wesley Araújo","Engenheiro de Redes",3,"Alocado",{Redes:3,"SD-WAN":3},[["Fortinet NSE 7","2027-06-06"]]],
+];
+const people = P.map(([n,c,u,d,s,ce])=>({n,c,u,d,s,ce}));
+const allSkills = [...new Set(people.flatMap(p=>Object.keys(p.s)))].sort((a,b)=>a.localeCompare(b,"pt"));
+const dpill = d => `<span class="pill ${d==="Disponível"?"p-ok":d==="Parcial"?"p-warn":"p-bad"}">${d}</span>`;
+const dots = l => "●".repeat(l)+"○".repeat(3-l);
+const days = s => Math.round((new Date(s)-HOJE)/864e5);
+const fmt = s => new Date(s+"T12:00").toLocaleDateString("pt-BR");
+const esc = s => s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function card(p, hits=[]){
+  const sk = Object.entries(p.s).sort((a,b)=>b[1]-a[1]).map(([k,l])=>`<span class="sk${hits.includes(k)?" hit":""}" title="Nível ${l} de 3">${esc(k)}<i>${dots(l)}</i></span>`).join("");
+  const ce = p.ce.length ? "Certificações: "+p.ce.map(c=>esc(c[0])).join(", ") : "Sem certificações cadastradas";
+  return `<article class="card"><div class="top"><div><div class="name">${esc(p.n)}</div><div class="role">${esc(p.c)}</div></div>${dpill(p.d)}</div><span class="unit">${U[p.u]}</span><div class="skills">${sk}</div><div class="certs">${ce}</div><button type="button" class="btn ghost" data-help="${people.indexOf(p)}">Pedir ajuda</button></article>`;
+}
+
+// Tiles
+const count = {}; people.forEach(p=>Object.keys(p.s).forEach(k=>count[k]=(count[k]||0)+1));
+const singles = allSkills.filter(k=>count[k]===1);
+const expiring = people.flatMap(p=>p.ce.map(c=>({p,c,d:days(c[1])}))).filter(x=>x.d<=120).sort((a,b)=>a.d-b.d);
+document.getElementById("tiles").innerHTML = [
+  [people.length,"pessoas mapeadas"],[U.length,"empresas do grupo"],
+  [people.reduce((a,p)=>a+p.ce.length,0),"certificações ativas"],
+  [singles.length,"habilidades com uma só pessoa",true]
+].map(([v,l,a])=>`<div class="tile${a?" alert":""}"><b>${v}</b><span>${l}</span></div>`).join("");
+
+// Pessoas
+const fu = document.getElementById("fu");
+fu.innerHTML = `<option value="">Todas as empresas</option>`+U.map((u,i)=>`<option value="${i}">${u}</option>`).join("");
+function renderList(){
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  const u = fu.value, d = document.getElementById("fd").value;
+  const res = people.filter(p=>{
+    if(u!=="" && p.u!=+u) return false;
+    if(d && p.d!==d) return false;
+    if(!q) return true;
+    return (p.n+" "+p.c+" "+Object.keys(p.s).join(" ")+" "+p.ce.map(c=>c[0]).join(" ")).toLowerCase().includes(q);
+  });
+  const hits = q ? allSkills.filter(k=>k.toLowerCase().includes(q)) : [];
+  res.sort((a,b)=>Math.max(0,...hits.map(h=>b.s[h]||0))-Math.max(0,...hits.map(h=>a.s[h]||0)));
+  document.getElementById("cnt").textContent = `${res.length} ${res.length===1?"pessoa encontrada":"pessoas encontradas"}`;
+  document.getElementById("list").innerHTML = res.length ? res.map(p=>card(p,hits)).join("") : `<p class="muted">Ninguém com esse perfil. Tente outro termo ou limpe os filtros.</p>`;
+}
+["q","fu","fd"].forEach(id=>document.getElementById(id).addEventListener("input",renderList));
+
+// Montar equipe
+let need = new Set(["ServiceNow ITSM","Azure","LGPD","Integrações API"]);
+const W = {"Disponível":1,"Parcial":.6,"Alocado":.15};
+function suggest(){
+  const left = new Set(need), team = [];
+  while(left.size){
+    let best=null,bs=0;
+    for(const p of people){ if(team.includes(p)) continue;
+      let sc=0; left.forEach(k=>{ if(p.s[k]) sc += p.s[k]; });
+      sc *= W[p.d]; if(sc>bs){bs=sc;best=p;} }
+    if(!best) break;
+    team.push(best); Object.keys(best.s).forEach(k=>left.delete(k));
+  }
+  return {team,left};
+}
+function renderTeam(){
+  document.getElementById("req").innerHTML = allSkills.map(k=>`<button class="chip" type="button" aria-pressed="${need.has(k)}" data-k="${esc(k)}">${esc(k)}</button>`).join("");
+  const {team,left} = suggest();
+  const pct = need.size ? Math.round((need.size-left.size)/need.size*100) : 0;
+  const units = new Set(team.map(p=>p.u)).size;
+  const busy = team.filter(p=>p.d==="Alocado").length;
+  document.getElementById("cov").innerHTML = !need.size ? `<h3>Selecione ao menos uma habilidade</h3>` :
+    `<h3>${team.length} ${team.length===1?"pessoa cobre":"pessoas cobrem"} ${pct}% do que o projeto precisa</h3>
+     <div class="meter"><div style="width:${pct}%"></div></div>
+     <div class="muted" style="font-size:14px">${units>1?`Equipe com gente de ${units} empresas do grupo, que hoje dificilmente seria montada. `:""}${busy?`${busy} ${busy===1?"pessoa está alocada":"pessoas estão alocadas"} em outro projeto e precisaria ser liberada. `:""}${left.size?`Sem ninguém no grupo para: <b>${[...left].map(esc).join(", ")}</b>.`:""}</div>`;
+  document.getElementById("team").innerHTML = team.map(p=>card(p,[...need])).join("");
+}
+document.getElementById("req").addEventListener("click",e=>{
+  const b = e.target.closest(".chip"); if(!b) return;
+  const k = b.dataset.k; need.has(k)?need.delete(k):need.add(k); renderTeam();
+});
+
+// Pedidos de ajuda
+const reqs = [{id:"AJD0001042",de:"Diego Souza (Nuvem & Broker)",para:people[16],sk:"Firewall",proj:"Data center órgão estadual",msg:"Preciso revisar as regras de firewall antes da migração de sexta.",urg:"Média (até 2 dias)",st:"Respondido"}];
+let cur = null;
+const dlg = document.getElementById("dlg");
+document.addEventListener("click",e=>{
+  const b = e.target.closest("[data-help]"); if(!b) return;
+  cur = people[+b.dataset.help];
+  document.getElementById("dt").textContent = "Pedir ajuda a "+cur.n;
+  document.getElementById("fs").innerHTML = Object.keys(cur.s).map(k=>`<option>${esc(k)}</option>`).join("");
+  document.getElementById("fm").value=""; if(dlg.showModal) dlg.showModal();
+});
+document.getElementById("cancel").addEventListener("click",()=>dlg.close());
+document.getElementById("f").addEventListener("submit",e=>{
+  e.preventDefault();
+  reqs.unshift({id:"AJD"+String(1043+reqs.length-1).padStart(7,"0"),de:"Você",para:cur,sk:document.getElementById("fs").value,
+    proj:document.getElementById("fp").value,msg:document.getElementById("fm").value,urg:document.getElementById("fu2").value,st:"Aberto"});
+  dlg.close(); renderReqs(); location.hash="ajuda";
+});
+function renderReqs(){
+  document.getElementById("nreq").textContent = reqs.filter(r=>r.st==="Aberto").length || "";
+  document.getElementById("reqs").innerHTML = reqs.map(r=>`<div class="rq"><div class="top"><b>${esc(r.sk)}: ${esc(r.de)} → ${esc(r.para.n)}</b><span>${r.id}</span></div>
+    <div class="muted" style="font-size:13px">Projeto: ${esc(r.proj)} · ${U[r.para.u]} · Urgência ${esc(r.urg)}</div>
+    <div>${esc(r.msg)}</div>
+    <div>${r.st==="Aberto"?'<span class="pill p-warn">Aberto, aguardando resposta</span>':'<span class="pill p-ok">Respondido</span>'}</div></div>`).join("")
+    + `<p class="muted" style="font-size:13px">No protótipo os chamados ficam só nesta tela. Na versão real, cada pedido seria criado como chamado no ServiceNow e avisaria a pessoa pelo Teams.</p>`;
+}
+
+// Riscos
+document.getElementById("single").innerHTML = "<table><tbody>"+singles.map(k=>{
+  const p = people.find(p=>p.s[k]); return `<tr><td>${esc(k)}</td><td>${esc(p.n)}<div class="muted" style="font-size:12px">${U[p.u]}</div></td></tr>`;
+}).join("")+"</tbody></table>";
+document.getElementById("exp").innerHTML = expiring.length ? "<table><tbody>"+expiring.map(x=>
+  `<tr><td>${esc(x.c[0])}<div class="muted" style="font-size:12px">${esc(x.p.n)}</div></td><td class="n"><span class="pill ${x.d<=45?"p-bad":"p-warn"}">${x.d} dias</span><div class="muted" style="font-size:12px">${fmt(x.c[1])}</div></td></tr>`).join("")+"</tbody></table>" : `<p class="muted">Nenhuma vencendo.</p>`;
+document.getElementById("matrix").innerHTML = allSkills.slice().sort((a,b)=>count[a]-count[b]||a.localeCompare(b,"pt")).map(k=>{
+  const ps = people.filter(p=>p.s[k]); const adv = ps.filter(p=>p.s[k]===3).length;
+  const us = [...new Set(ps.map(p=>U[p.u]))].join(", ");
+  return `<tr><td>${esc(k)}</td><td class="n">${ps.length===1?`<span class="pill p-bad">1</span>`:ps.length}</td><td class="n">${adv}</td><td class="muted">${us}</td></tr>`;
+}).join("");
+
+// Abas
+function route(){
+  const v = ["pessoas","equipe","ajuda","riscos"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "pessoas";
+  document.querySelectorAll(".view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));
+  document.querySelectorAll("nav a").forEach(a=>a.dataset.v===v?a.setAttribute("aria-current","page"):a.removeAttribute("aria-current"));
+}
+window.addEventListener("hashchange",route);
+renderList(); renderTeam(); renderReqs(); route();
+</script>
+</body>
+</html>
